@@ -10,25 +10,28 @@ import os
 
 @csrf_exempt
 def schedule(request):
-  if request.method == 'GET': return HttpResponse("welcome to 1v1 app")
+  try:
+    if request.method == 'GET': return HttpResponse("welcome to 1v1 app")
 
-  channel_id = request.POST.get('channel_id')
-  user_id = request.POST.get('user_id')
+    channel_id = request.POST.get('channel_id')
+    user_id = request.POST.get('user_id')
 
-  # logger
-  print(f"User ran command: schedule_1v1s\nuser_id: {user_id}\nchannel_id: {channel_id}")
+    # logger
+    print(f"User ran command: schedule_1v1s\nuser_id: {user_id}\nchannel_id: {channel_id}")
 
-  slack_client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
-  users_info = slack_users(slack_client)
-  if not users_info: return HttpResponse("Failed to schedule")
+    slack_client = WebClient(os.environ.get('SLACK_BOT_TOKEN'))
+    users_info = slack_users(slack_client)
+    if not users_info: return HttpResponse("Failed to schedule")
 
-  # logger
-  print(f"email: {safeget(users_info, user_id, 'email')}")
+    # logger
+    print(f"email: {safeget(users_info, user_id, 'email')}")
 
-  # check if user is allowed to execute command
-  if safeget(users_info, user_id, 'email') not in config.ALLOWED_USERS:
-    return HttpResponse("Not allowed to perform this action")
+    # check if user is allowed to execute command
+    if safeget(users_info, user_id, 'email') not in config.ALLOWED_USERS:
+      return HttpResponse("Not allowed to perform this action")
 
-  schedule_1v1(slack_client, channel_id, users_info)
+    schedule_1v1(slack_client, channel_id, users_info)
 
-  return HttpResponse("1v1 have start searching :mag:")
+    return HttpResponse("1v1 have start searching :mag:")
+  except Exception as e:
+    return HttpResponse(e.message)
